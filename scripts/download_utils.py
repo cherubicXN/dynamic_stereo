@@ -236,7 +236,7 @@ def _download_split_file(
     local_fl = os.path.join(in_progress_folder, link_name)
 
     print(f"Downloading dataset file {link_name} ({url}) to {local_fl}.")
-    _download_with_progress_bar(url, local_fl, link_name)
+    _download_without_progress_bar(url, local_fl, link_name)
     if checksum_check:
         print(f"Checking SHA256 for {local_fl}.")
         try:
@@ -272,6 +272,19 @@ def _download_with_progress_bar(url: str, fname: str, filename: str):
         for datai, data in enumerate(resp.iter_content(chunk_size=1024)):
             size = file.write(data)
             bar.update(size)
+            if datai % max((max(total // 1024, 1) // 20), 1) == 0:
+                print(f"{filename}: Downloaded {100.0*(float(bar.n)/max(total, 1)):3.1f}%.")
+                print(bar)
+
+def _download_without_progress_bar(url: str, fname: str, filename: str):
+
+    # taken from https://stackoverflow.com/a/62113293/986477
+    resp = requests.get(url, stream=True)
+    print(url)
+    total = int(resp.headers.get("content-length", 0))
+    with open(fname, "wb") as fil:
+        for datai, data in enumerate(resp.iter_content(chunk_size=1024)):
+            size = file.write(data)
             if datai % max((max(total // 1024, 1) // 20), 1) == 0:
                 print(f"{filename}: Downloaded {100.0*(float(bar.n)/max(total, 1)):3.1f}%.")
                 print(bar)
