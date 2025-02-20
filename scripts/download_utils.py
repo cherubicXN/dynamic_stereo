@@ -282,9 +282,11 @@ def _download_without_progress_bar(url: str, fname: str, filename: str):
     resp = requests.get(url, stream=True)
     print(url)
     total = int(resp.headers.get("content-length", 0))
-    with open(fname, "wb") as fil:
+    real = 0
+    with open(fname, "wb") as file:
         for datai, data in enumerate(resp.iter_content(chunk_size=1024)):
             size = file.write(data)
+            real += size
             if datai % max((max(total // 1024, 1) // 20), 1) == 0:
-                print(f"{filename}: Downloaded {100.0*(float(bar.n)/max(total, 1)):3.1f}%.")
-                print(bar)
+                #print(f"{filename}: Downloaded {100.0*(float(bar.n)/max(total, 1)):3.1f}%.")
+                print(f"{filename}: Downloaded {100.0*(float(real)/max(total, 1)):3.1f}%.")
